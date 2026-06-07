@@ -1,52 +1,94 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert, Anchor, Button, Center, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core'
-import { IconAlertCircle } from '@tabler/icons-react'
+import { Anchor, Button, PasswordInput, Stack, Text, TextInput } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
+import { AuthLayout } from '../components/AuthLayout'
+import { PasswordStrength } from './PasswordStrength'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { apiUrl } from '../config'
+
+interface FormErrors {
+  companyName?: string
+  email?: string
+  password?: string
+}
+
+function validateField(field: keyof FormErrors, value: string): string | undefined {
+  if (field === 'companyName') {
+    return value.trim() ? undefined : 'Company name is required.'
+  }
+  if (field === 'email') {
+    if (!value.trim()) return 'Email is required.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return 'Please enter a valid email address.'
+  }
+  if (field === 'password') {
+    if (!value.trim()) return 'Password is required.'
+    if (value.length < 8) return 'Password must be at least 8 characters.'
+  }
+}
 
 export function SignUpForm() {
+  useDocumentTitle('Sign up')
   const navigate = useNavigate()
   const [companyName, setCompanyName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<{ companyName?: string; email?: string; password?: string }>({})
-  const [serverError, setServerError] = useState('')
+  const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function validate() {
-    const errs: typeof errors = {}
-    if (!companyName.trim()) errs.companyName = 'Company name is required.'
-    if (!email.trim()) errs.email = 'Email is required.'
-    if (!password.trim()) errs.password = 'Password is required.'
-    return errs
+  function setFieldError(field: keyof FormErrors, error: string | undefined) {
+    setErrors(prev => ({ ...prev, [field]: error }))
+  }
+
+  function handleBlur(field: keyof FormErrors, value: string) {
+    setFieldError(field, validateField(field, value))
+  }
+
+  function handleChange(field: keyof FormErrors, value: string) {
+    if (errors[field]) setFieldError(field, undefined)
+    if (field === 'companyName') setCompanyName(value)
+    if (field === 'email') setEmail(value)
+    if (field === 'password') setPassword(value)
+  }
+
+  function validateAll(): FormErrors {
+    return {
+      companyName: validateField('companyName', companyName),
+      email: validateField('email', email),
+      password: validateField('password', password),
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const errs = validate()
-    if (Object.keys(errs).length > 0) {
+    const errs = validateAll()
+    if (Object.values(errs).some(Boolean)) {
       setErrors(errs)
       return
     }
 
     setIsSubmitting(true)
-    setErrors({})
-    setServerError('')
-
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(apiUrl('/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyName, email, password }),
+        body: JSON.stringify({ companyName, email: email.trim().toLowerCase(), password }),
       })
 
       if (res.ok) {
         const { token } = await res.json() as { token: string }
         localStorage.setItem('token', token)
+        notifications.show({
+          title: 'Welcome to DocumentHub!',
+          message: 'Your account has been created.',
+          color: 'green',
+          autoClose: 3000,
+        })
         navigate('/dashboard')
       } else if (res.status === 409) {
-        setServerError('A user with this email already exists.')
+        setFieldError('email', 'A user with this email already exists.')
       } else {
-        setServerError('Registration failed. Please try again.')
+        notifications.show({ title: 'Error', message: 'Registration failed. Please try again.', color: 'red' })
       }
     } finally {
       setIsSubmitting(false)
@@ -54,48 +96,51 @@ export function SignUpForm() {
   }
 
   return (
-    <Center mih="100svh">
-      <Paper withBorder shadow="md" p="xl" w={420}>
-        <Title order={2} mb="lg">Create your account</Title>
-
-        {serverError && (
-          <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
-            {serverError}
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate>
-          <Stack>
-            <TextInput
-              label="Company Name"
-              value={companyName}
-              onChange={e => setCompanyName(e.target.value)}
-              error={errors.companyName}
-            />
-            <TextInput
-              label="Email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              error={errors.email}
-            />
+    <AuthLayout title="Create your account" subtitle="Start your free trial — no credit card required.">
+      <form onSubmit={handleSubmit} noValidate>
+        <Stack>
+          <TextInput
+            label="Company Name"
+            value={companyName}
+            onChange={e => handleChange('companyName', e.target.value)}
+            onBlur={() => handleBlur('companyName', companyName)}
+            error={errors.companyName}
+            autoComplete="organization"
+            required
+            autoFocus
+          />
+          <TextInput
+            label="Email"
+            type="email"
+            value={email}
+            onChange={e => handleChange('email', e.target.value)}
+            onBlur={() => handleBlur('email', email)}
+            error={errors.email}
+            autoComplete="email"
+            required
+          />
+          <Stack gap="xs">
             <PasswordInput
               label="Password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={e => handleChange('password', e.target.value)}
+              onBlur={() => handleBlur('password', password)}
               error={errors.password}
+              autoComplete="new-password"
+              required
             />
-            <Button type="submit" loading={isSubmitting} fullWidth mt="sm">
-              Sign up
-            </Button>
+            <PasswordStrength password={password} />
           </Stack>
-        </form>
+          <Button type="submit" loading={isSubmitting} fullWidth mt="xs">
+            {isSubmitting ? 'Signing up…' : 'Sign up'}
+          </Button>
+        </Stack>
+      </form>
 
-        <Text size="sm" ta="center" mt="md">
-          Already have an account?{' '}
-          <Anchor href="/login">Log in</Anchor>
-        </Text>
-      </Paper>
-    </Center>
+      <Text size="sm" ta="center" mt="md">
+        Already have an account?{' '}
+        <Anchor href="/login">Log in</Anchor>
+      </Text>
+    </AuthLayout>
   )
 }

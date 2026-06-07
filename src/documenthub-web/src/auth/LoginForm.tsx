@@ -1,40 +1,69 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert, Anchor, Button, Center, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core'
-import { IconAlertCircle } from '@tabler/icons-react'
+import { Anchor, Button, PasswordInput, Stack, Text, TextInput } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
+import { AuthLayout } from '../components/AuthLayout'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { apiUrl } from '../config'
+
+interface FormErrors {
+  email?: string
+  password?: string
+}
+
+function validateField(field: keyof FormErrors, value: string): string | undefined {
+  if (field === 'email') {
+    if (!value.trim()) return 'Email is required.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return 'Please enter a valid email address.'
+  }
+  if (field === 'password') {
+    return value.trim() ? undefined : 'Password is required.'
+  }
+}
 
 export function LoginForm() {
+  useDocumentTitle('Log in')
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
-  const [serverError, setServerError] = useState('')
+  const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function validate() {
-    const errs: typeof errors = {}
-    if (!email.trim()) errs.email = 'Email is required.'
-    if (!password.trim()) errs.password = 'Password is required.'
-    return errs
+  function setFieldError(field: keyof FormErrors, error: string | undefined) {
+    setErrors(prev => ({ ...prev, [field]: error }))
+  }
+
+  function handleBlur(field: keyof FormErrors, value: string) {
+    setFieldError(field, validateField(field, value))
+  }
+
+  function handleChange(field: keyof FormErrors, value: string) {
+    if (errors[field]) setFieldError(field, undefined)
+    if (field === 'email') setEmail(value)
+    if (field === 'password') setPassword(value)
+  }
+
+  function validateAll(): FormErrors {
+    return {
+      email: validateField('email', email),
+      password: validateField('password', password),
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const errs = validate()
-    if (Object.keys(errs).length > 0) {
+    const errs = validateAll()
+    if (Object.values(errs).some(Boolean)) {
       setErrors(errs)
       return
     }
 
     setIsSubmitting(true)
-    setErrors({})
-    setServerError('')
-
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(apiUrl('/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       })
 
       if (res.ok) {
@@ -42,9 +71,9 @@ export function LoginForm() {
         localStorage.setItem('token', token)
         navigate('/dashboard')
       } else if (res.status === 401) {
-        setServerError('Invalid email or password.')
+        setFieldError('email', 'Invalid email or password.')
       } else {
-        setServerError('Login failed. Please try again.')
+        notifications.show({ title: 'Error', message: 'Login failed. Please try again.', color: 'red' })
       }
     } finally {
       setIsSubmitting(false)
@@ -52,42 +81,39 @@ export function LoginForm() {
   }
 
   return (
-    <Center mih="100svh">
-      <Paper withBorder shadow="md" p="xl" w={420}>
-        <Title order={2} mb="lg">Sign in to DocumentHub</Title>
+    <AuthLayout title="Welcome back" subtitle="Sign in to your DocumentHub account.">
+      <form onSubmit={handleSubmit} noValidate>
+        <Stack>
+          <TextInput
+            label="Email"
+            type="email"
+            value={email}
+            onChange={e => handleChange('email', e.target.value)}
+            onBlur={() => handleBlur('email', email)}
+            error={errors.email}
+            autoComplete="email"
+            required
+            autoFocus
+          />
+          <PasswordInput
+            label="Password"
+            value={password}
+            onChange={e => handleChange('password', e.target.value)}
+            onBlur={() => handleBlur('password', password)}
+            error={errors.password}
+            autoComplete="current-password"
+            required
+          />
+          <Button type="submit" loading={isSubmitting} fullWidth mt="xs">
+            {isSubmitting ? 'Logging in…' : 'Log in'}
+          </Button>
+        </Stack>
+      </form>
 
-        {serverError && (
-          <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
-            {serverError}
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate>
-          <Stack>
-            <TextInput
-              label="Email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              error={errors.email}
-            />
-            <PasswordInput
-              label="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              error={errors.password}
-            />
-            <Button type="submit" loading={isSubmitting} fullWidth mt="sm">
-              Log in
-            </Button>
-          </Stack>
-        </form>
-
-        <Text size="sm" ta="center" mt="md">
-          Don't have an account?{' '}
-          <Anchor href="/register">Sign up</Anchor>
-        </Text>
-      </Paper>
-    </Center>
+      <Text size="sm" ta="center" mt="md">
+        Don't have an account?{' '}
+        <Anchor href="/register">Sign up</Anchor>
+      </Text>
+    </AuthLayout>
   )
 }
