@@ -1,8 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentHub.Domain\DocumentHub.Domain.csproj" />
-    <ProjectReference Include="..\DocumentHub.Application\DocumentHub.Application.csproj" />
+    <ProjectReference Include="..\DocumentHub.Core\DocumentHub.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

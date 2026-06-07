@@ -6,7 +6,7 @@ How the engineering skills should consume this repo's domain documentation.
 
 - **`CONTEXT-MAP.md`** at the repo root — it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
 - **`docs/adr/`** — read ADRs that touch the area you're about to work in (system-wide decisions).
-- Also check `src/DocumentHub.Api/docs/adr/` for backend-specific decisions and `src/documenthub-web/docs/adr/` for frontend-specific decisions.
+- Also check `src/DocumentHub.Web/docs/adr/` for backend-specific decisions and `src/documenthub-web/docs/adr/` for frontend-specific decisions.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The producer skill (`/grill-with-docs`) creates them lazily when terms or decisions actually get resolved.
 
@@ -17,17 +17,21 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 ├── CONTEXT-MAP.md
 ├── docs/adr/                              ← system-wide decisions
 ├── src/
-│   ├── DocumentHub.Api/                   ← ASP.NET Core Web API
-│   │   ├── CONTEXT.md                     ← backend domain language & glossary
-│   │   └── docs/adr/                      ← backend-specific decisions
-│   └── documenthub-web/                   ← React frontend
-│       ├── CONTEXT.md                     ← frontend domain language & glossary
-│       └── docs/adr/                      ← frontend-specific decisions
+│   ├── DocumentHub.Core/                  ← entities, exceptions, interfaces, use-case handlers
+│   ├── DocumentHub.Infrastructure/        ← EF Core, auth adapters, DI wiring
+│   └── DocumentHub.Web/                   ← ASP.NET Core host, endpoints
+│       ├── CONTEXT.md                     ← backend domain language & glossary
+│       └── docs/adr/                      ← backend-specific decisions
+├── src/documenthub-web/                   ← React frontend
+│   ├── CONTEXT.md                         ← frontend domain language & glossary
+│   └── docs/adr/                          ← frontend-specific decisions
 ├── tests/
-│   └── DocumentHub.Api.Tests/
+│   ├── DocumentHub.IntegrationTests/
+│   ├── DocumentHub.UnitTests/
+│   └── DocumentHub.FunctionalTests/
 ├── docs/
 │   └── adr/
-└── DocumentHub.sln
+└── DocumentHub.slnx
 ```
 
 ## Use the glossary's vocabulary

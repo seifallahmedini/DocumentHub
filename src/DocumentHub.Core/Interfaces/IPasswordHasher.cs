@@ -1,4 +1,4 @@
-namespace DocumentHub.Application.Auth;
+namespace DocumentHub.Core.Interfaces;
 
 public interface IPasswordHasher
 {

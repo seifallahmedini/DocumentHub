@@ -2,7 +2,7 @@
 
 ## Contexts
 
-- [API](./src/DocumentHub.Api/CONTEXT.md) — backend domain: tenants, documents, invoices, storage
+- [API](./src/DocumentHub.Web/CONTEXT.md) — backend domain: tenants, documents, invoices, storage
 - [Web](./src/documenthub-web/CONTEXT.md) — frontend domain: UI flows, view models, user interactions
 
 ## Relationships

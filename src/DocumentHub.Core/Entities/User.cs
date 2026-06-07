@@ -1,4 +1,4 @@
-namespace DocumentHub.Domain.Entities;
+namespace DocumentHub.Core.Entities;
 
 public class User
 {

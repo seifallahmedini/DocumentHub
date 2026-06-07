@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DocumentHub.Api.Tests;
+namespace DocumentHub.IntegrationTests;
 
 public class TestWebApplicationFactory : WebApplicationFactory<Program>, IDisposable
 {

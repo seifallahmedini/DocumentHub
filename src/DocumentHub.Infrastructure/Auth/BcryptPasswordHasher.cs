@@ -1,4 +1,4 @@
-using DocumentHub.Application.Auth;
+using DocumentHub.Core.Interfaces;
 
 namespace DocumentHub.Infrastructure.Auth;
 

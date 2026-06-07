@@ -1,7 +1,7 @@
 using System.Text;
-using DocumentHub.Application;
-using DocumentHub.Application.Auth;
+using DocumentHub.Core.Interfaces;
 using DocumentHub.Infrastructure.Auth;
+using DocumentHub.Infrastructure.Data;
 using DocumentHub.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -38,7 +38,7 @@ public static class DependencyInjection
 
         var connectionString = configuration.GetConnectionString("Default") ?? "Data Source=documenthub.db";
         services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
-        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
 
