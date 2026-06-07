@@ -7,7 +7,7 @@ namespace DocumentHub.Core.UseCases.Auth;
 public record RegisterCommand(string CompanyName, string Email, string Password);
 public record RegisterResult(string Token);
 
-public class RegisterHandler(IAppDbContext db, ITokenService tokenService, IPasswordHasher passwordHasher)
+public class RegisterHandler(IRepository<Tenant> tenants, ITokenService tokenService, IPasswordHasher passwordHasher)
 {
     public async Task<RegisterResult> HandleAsync(RegisterCommand command)
     {
@@ -19,7 +19,7 @@ public class RegisterHandler(IAppDbContext db, ITokenService tokenService, IPass
         var email = command.Email.Trim().ToLower();
 
         var tenant = new Tenant { Id = Guid.NewGuid(), Name = command.CompanyName, CreatedAt = DateTime.UtcNow };
-        var user = new User
+        tenant.Users.Add(new User
         {
             Id = Guid.NewGuid(),
             TenantId = tenant.Id,
@@ -27,12 +27,11 @@ public class RegisterHandler(IAppDbContext db, ITokenService tokenService, IPass
             PasswordHash = passwordHasher.Hash(command.Password),
             Role = UserRole.Admin,
             CreatedAt = DateTime.UtcNow
-        };
+        });
 
-        await db.AddTenantAsync(tenant);
-        await db.AddUserAsync(user);
-        await db.SaveChangesAsync();
+        await tenants.AddAsync(tenant);  // EF cascade-inserts User atomically
 
-        return new RegisterResult(tokenService.GenerateToken(user.Id, user.TenantId, user.Role.ToString()));
+        var admin = tenant.Users.First();
+        return new RegisterResult(tokenService.GenerateToken(admin.Id, admin.TenantId, admin.Role.ToString()));
     }
 }
