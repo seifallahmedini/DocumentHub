@@ -17,4 +17,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DocumentHub.Application\DocumentHub.Application.csproj" />
+    <ProjectReference Include="..\DocumentHub.Infrastructure\DocumentHub.Infrastructure.csproj" />
+    <ProjectReference Include="..\DocumentHub.Domain\DocumentHub.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

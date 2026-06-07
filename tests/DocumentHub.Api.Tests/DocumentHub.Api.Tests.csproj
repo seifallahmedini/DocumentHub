@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DocumentHub.Api\DocumentHub.Api.csproj" />
+    <ProjectReference Include="..\..\src\DocumentHub.Infrastructure\DocumentHub.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
