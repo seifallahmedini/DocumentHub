@@ -18,7 +18,9 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGroup("/auth").MapAuthEndpoints();
+app.MapGroup("/auth")
+   .MapRegisterEndpoint()
+   .MapLoginEndpoint();
 
 app.Run();
 
