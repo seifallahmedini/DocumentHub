@@ -1,23 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-interface FormErrors {
-  companyName?: string
-  email?: string
-  password?: string
-  server?: string
-}
+import { Alert, Anchor, Button, Center, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core'
+import { IconAlertCircle } from '@tabler/icons-react'
 
 export function SignUpForm() {
   const navigate = useNavigate()
   const [companyName, setCompanyName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<FormErrors>({})
+  const [errors, setErrors] = useState<{ companyName?: string; email?: string; password?: string }>({})
+  const [serverError, setServerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function validate(): FormErrors {
-    const errs: FormErrors = {}
+  function validate() {
+    const errs: typeof errors = {}
     if (!companyName.trim()) errs.companyName = 'Company name is required.'
     if (!email.trim()) errs.email = 'Email is required.'
     if (!password.trim()) errs.password = 'Password is required.'
@@ -34,6 +30,7 @@ export function SignUpForm() {
 
     setIsSubmitting(true)
     setErrors({})
+    setServerError('')
 
     try {
       const res = await fetch('/api/auth/register', {
@@ -47,9 +44,9 @@ export function SignUpForm() {
         localStorage.setItem('token', token)
         navigate('/dashboard')
       } else if (res.status === 409) {
-        setErrors({ server: 'A user with this email already exists.' })
+        setServerError('A user with this email already exists.')
       } else {
-        setErrors({ server: 'Registration failed. Please try again.' })
+        setServerError('Registration failed. Please try again.')
       }
     } finally {
       setIsSubmitting(false)
@@ -57,45 +54,48 @@ export function SignUpForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <div>
-        <label htmlFor="companyName">Company Name</label>
-        <input
-          id="companyName"
-          type="text"
-          value={companyName}
-          onChange={e => setCompanyName(e.target.value)}
-        />
-        {errors.companyName && <span>{errors.companyName}</span>}
-      </div>
+    <Center mih="100svh">
+      <Paper withBorder shadow="md" p="xl" w={420}>
+        <Title order={2} mb="lg">Create your account</Title>
 
-      <div>
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-        {errors.email && <span>{errors.email}</span>}
-      </div>
+        {serverError && (
+          <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
+            {serverError}
+          </Alert>
+        )}
 
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
-        {errors.password && <span>{errors.password}</span>}
-      </div>
+        <form onSubmit={handleSubmit} noValidate>
+          <Stack>
+            <TextInput
+              label="Company Name"
+              value={companyName}
+              onChange={e => setCompanyName(e.target.value)}
+              error={errors.companyName}
+            />
+            <TextInput
+              label="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              error={errors.email}
+            />
+            <PasswordInput
+              label="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              error={errors.password}
+            />
+            <Button type="submit" loading={isSubmitting} fullWidth mt="sm">
+              Sign up
+            </Button>
+          </Stack>
+        </form>
 
-      {errors.server && <span>{errors.server}</span>}
-
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Signing up…' : 'Sign up'}
-      </button>
-    </form>
+        <Text size="sm" ta="center" mt="md">
+          Already have an account?{' '}
+          <Anchor href="/login">Log in</Anchor>
+        </Text>
+      </Paper>
+    </Center>
   )
 }

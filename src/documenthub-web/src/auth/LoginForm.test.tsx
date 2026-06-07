@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { MantineProvider } from '@mantine/core'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { LoginForm } from './LoginForm'
 
@@ -9,6 +10,14 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate }
 })
 
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <MantineProvider>
+      <MemoryRouter>{children}</MemoryRouter>
+    </MantineProvider>
+  )
+}
+
 beforeEach(() => {
   mockNavigate.mockReset()
   localStorage.clear()
@@ -17,7 +26,7 @@ beforeEach(() => {
 
 describe('LoginForm', () => {
   it('shows validation errors when fields are empty', async () => {
-    render(<LoginForm />, { wrapper: MemoryRouter })
+    render(<LoginForm />, { wrapper: Wrapper })
 
     fireEvent.click(screen.getByRole('button', { name: /log in/i }))
 
@@ -30,10 +39,10 @@ describe('LoginForm', () => {
       new Response(JSON.stringify({ token: 'jwt-token-123' }), { status: 200 })
     )
 
-    render(<LoginForm />, { wrapper: MemoryRouter })
+    render(<LoginForm />, { wrapper: Wrapper })
 
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'admin@titancore.tn' } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'SecurePass123!' } })
+    fireEvent.change(screen.getByLabelText(/password/i, { selector: 'input' }), { target: { value: 'SecurePass123!' } })
     fireEvent.click(screen.getByRole('button', { name: /log in/i }))
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/dashboard'))
@@ -45,10 +54,10 @@ describe('LoginForm', () => {
       new Response(null, { status: 401 })
     )
 
-    render(<LoginForm />, { wrapper: MemoryRouter })
+    render(<LoginForm />, { wrapper: Wrapper })
 
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'admin@titancore.tn' } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'wrong' } })
+    fireEvent.change(screen.getByLabelText(/password/i, { selector: 'input' }), { target: { value: 'wrong' } })
     fireEvent.click(screen.getByRole('button', { name: /log in/i }))
 
     expect(await screen.findByText(/invalid email or password/i)).toBeInTheDocument()
