@@ -1,5 +1,5 @@
 using DocumentHub.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using DocumentHub.Domain.Exceptions;
 
 namespace DocumentHub.Application.Auth;
 
@@ -8,14 +8,14 @@ public record RegisterResult(string Token);
 
 public class RegisterHandler(IAppDbContext db, ITokenService tokenService, IPasswordHasher passwordHasher)
 {
-    public async Task<RegisterResult?> HandleAsync(RegisterCommand command)
+    public async Task<RegisterResult> HandleAsync(RegisterCommand command)
     {
         if (string.IsNullOrWhiteSpace(command.CompanyName) ||
             string.IsNullOrWhiteSpace(command.Email) ||
             string.IsNullOrWhiteSpace(command.Password))
-            return null;
+            throw new RegistrationValidationException("CompanyName, Email, and Password are required.");
 
-        var email = command.Email.ToLower();
+        var email = command.Email.Trim().ToLower();
 
         var tenant = new Tenant { Id = Guid.NewGuid(), Name = command.CompanyName, CreatedAt = DateTime.UtcNow };
         var user = new User
@@ -28,10 +28,10 @@ public class RegisterHandler(IAppDbContext db, ITokenService tokenService, IPass
             CreatedAt = DateTime.UtcNow
         };
 
-        db.Tenants.Add(tenant);
-        db.Users.Add(user);
-        await db.SaveChangesAsync();
+        await db.AddTenantAsync(tenant);
+        await db.AddUserAsync(user);
+        await db.SaveChangesAsync();  // throws DuplicateEmailException on unique constraint
 
-        return new RegisterResult(tokenService.GenerateToken(user));
+        return new RegisterResult(tokenService.GenerateToken(user.Id, user.TenantId, user.Role.ToString()));
     }
 }

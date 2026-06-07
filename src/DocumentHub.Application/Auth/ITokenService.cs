@@ -1,8 +1,6 @@
-using DocumentHub.Domain.Entities;
-
 namespace DocumentHub.Application.Auth;
 
 public interface ITokenService
 {
-    string GenerateToken(User user);
+    string GenerateToken(Guid userId, Guid tenantId, string role);
 }

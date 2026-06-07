@@ -1,13 +1,38 @@
 using DocumentHub.Application;
 using DocumentHub.Domain.Entities;
+using DocumentHub.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocumentHub.Infrastructure.Persistence;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
 {
-    public DbSet<Tenant> Tenants => Set<Tenant>();
-    public DbSet<User> Users => Set<User>();
+    internal DbSet<Tenant> Tenants => Set<Tenant>();
+    internal DbSet<User> Users => Set<User>();
+
+    public Task AddTenantAsync(Tenant tenant, CancellationToken cancellationToken = default)
+    {
+        Tenants.Add(tenant);
+        return Task.CompletedTask;
+    }
+
+    public Task AddUserAsync(User user, CancellationToken cancellationToken = default)
+    {
+        Users.Add(user);
+        return Task.CompletedTask;
+    }
+
+    async Task IAppDbContext.SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("UNIQUE") == true)
+        {
+            throw new DuplicateEmailException();
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

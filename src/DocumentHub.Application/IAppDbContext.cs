@@ -1,11 +1,10 @@
 using DocumentHub.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace DocumentHub.Application;
 
 public interface IAppDbContext
 {
-    DbSet<Tenant> Tenants { get; }
-    DbSet<User> Users { get; }
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task AddTenantAsync(Tenant tenant, CancellationToken cancellationToken = default);
+    Task AddUserAsync(User user, CancellationToken cancellationToken = default);
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

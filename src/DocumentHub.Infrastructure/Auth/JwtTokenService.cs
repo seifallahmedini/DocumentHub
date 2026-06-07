@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using DocumentHub.Application.Auth;
-using DocumentHub.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,7 +13,7 @@ public class JwtTokenService(IConfiguration configuration) : ITokenService
     private const string TenantIdClaim = "tenantId";
     private const string RoleClaim = "role";
 
-    public string GenerateToken(User user)
+    public string GenerateToken(Guid userId, Guid tenantId, string role)
     {
         var key = configuration["Jwt:Key"]
             ?? throw new InvalidOperationException("Jwt:Key is not configured.");
@@ -22,9 +21,9 @@ public class JwtTokenService(IConfiguration configuration) : ITokenService
 
         var claims = new[]
         {
-            new Claim(UserIdClaim, user.Id.ToString()),
-            new Claim(TenantIdClaim, user.TenantId.ToString()),
-            new Claim(RoleClaim, user.Role.ToString())
+            new Claim(UserIdClaim, userId.ToString()),
+            new Claim(TenantIdClaim, tenantId.ToString()),
+            new Claim(RoleClaim, role)
         };
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
