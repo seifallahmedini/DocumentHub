@@ -10,6 +10,11 @@ src/documenthub-web/dist/
 # dotenv files
 .env
 
+# SQLite dev database
+*.db
+*.db-shm
+*.db-wal
+
 # User-specific files
 *.rsuser
 *.suo

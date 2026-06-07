@@ -1,14 +1,18 @@
+using System.Text;
 using DocumentHub.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DocumentHub.IntegrationTests;
 
 public class TestWebApplicationFactory : WebApplicationFactory<Program>, IDisposable
 {
+    private const string TestJwtKey = "test-secret-key-for-testing-only-32chars!!";
     private readonly string _dbPath;
 
     public TestWebApplicationFactory()
@@ -22,7 +26,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>, IDispos
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Jwt:Key"] = "test-secret-key-for-testing-only-32chars!!",
+                ["Jwt:Key"] = TestJwtKey,
                 ["Jwt:Issuer"] = "DocumentHub"
             });
         });
@@ -36,6 +40,13 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>, IDispos
 
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite($"Data Source={_dbPath}"));
+
+            // Ensure JWT validation key matches what JwtTokenService uses for signing
+            services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters.IssuerSigningKey =
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(TestJwtKey));
+            });
         });
     }
 

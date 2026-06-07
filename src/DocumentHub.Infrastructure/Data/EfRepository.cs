@@ -28,4 +28,7 @@ public class EfRepository<T>(AppDbContext context) : IRepository<T> where T : cl
 
     public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         => await context.Set<T>().FirstOrDefaultAsync(predicate, cancellationToken);
+
+    public async Task<List<T>> ListAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        => await context.Set<T>().Where(predicate).ToListAsync(cancellationToken);
 }
