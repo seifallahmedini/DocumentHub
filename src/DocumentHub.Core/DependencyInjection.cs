@@ -1,4 +1,5 @@
 using DocumentHub.Core.UseCases.Auth;
+using DocumentHub.Core.UseCases.Documents;
 using DocumentHub.Core.UseCases.Users;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +14,10 @@ public static class DependencyInjection
         services.AddScoped<InviteHandler>();
         services.AddScoped<RemoveMemberHandler>();
         services.AddScoped<GetMembersHandler>();
+        services.AddScoped<UploadDocumentHandler>();
+        services.AddScoped<DownloadDocumentHandler>();
+        services.AddScoped<UpdateDocumentHandler>();
+        services.AddScoped<DeleteDocumentHandler>();
         return services;
     }
 }

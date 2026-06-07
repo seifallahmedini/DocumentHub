@@ -14,10 +14,12 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>, IDispos
 {
     private const string TestJwtKey = "test-secret-key-for-testing-only-32chars!!";
     private readonly string _dbPath;
+    private readonly string _uploadsRoot;
 
     public TestWebApplicationFactory()
     {
         _dbPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.db");
+        _uploadsRoot = Path.Combine(Path.GetTempPath(), $"uploads-{Guid.NewGuid()}");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -27,7 +29,8 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>, IDispos
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Jwt:Key"] = TestJwtKey,
-                ["Jwt:Issuer"] = "DocumentHub"
+                ["Jwt:Issuer"] = "DocumentHub",
+                ["FileStorage:Root"] = _uploadsRoot
             });
         });
 
@@ -57,5 +60,6 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>, IDispos
         try { if (File.Exists(_dbPath)) File.Delete(_dbPath); } catch (IOException) { }
         try { if (File.Exists(_dbPath + "-wal")) File.Delete(_dbPath + "-wal"); } catch (IOException) { }
         try { if (File.Exists(_dbPath + "-shm")) File.Delete(_dbPath + "-shm"); } catch (IOException) { }
+        try { if (Directory.Exists(_uploadsRoot)) Directory.Delete(_uploadsRoot, recursive: true); } catch (IOException) { }
     }
 }

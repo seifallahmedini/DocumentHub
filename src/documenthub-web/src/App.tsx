@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import {
   ActionIcon,
@@ -34,6 +34,7 @@ import { clearToken, isAuthenticated } from './auth/useAuth'
 import { Logo } from './components/Logo'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { MembersPage } from './pages/MembersPage'
+import { UploadModal } from './components/UploadModal'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />
@@ -47,6 +48,8 @@ const STATS = [
 
 function DashboardHome() {
   useDocumentTitle('Dashboard')
+  const [uploadOpen, setUploadOpen] = useState(false)
+
   return (
     <Container size="lg" py="xl">
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
@@ -71,11 +74,12 @@ function DashboardHome() {
           <Text c="dimmed" size="sm" ta="center" maw={360}>
             Upload your first document to get started. You can organise, tag, and search all your company files from here.
           </Text>
-          <Button leftSection={<IconFilePlus size={16} />} disabled mt="xs">
+          <Button leftSection={<IconFilePlus size={16} />} mt="xs" onClick={() => setUploadOpen(true)}>
             Upload document
           </Button>
         </Stack>
       </Paper>
+      <UploadModal opened={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={() => {}} />
     </Container>
   )
 }

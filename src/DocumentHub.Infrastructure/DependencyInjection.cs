@@ -3,6 +3,7 @@ using DocumentHub.Core.Interfaces;
 using DocumentHub.Infrastructure.Auth;
 using DocumentHub.Infrastructure.Data;
 using DocumentHub.Infrastructure.Persistence;
+using DocumentHub.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
+        services.AddScoped<IFileStore, LocalFileStore>();
 
         return services;
     }
