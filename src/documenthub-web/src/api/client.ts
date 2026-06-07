@@ -1,4 +1,5 @@
 import { clearToken, getToken } from '../auth/useAuth'
+import { apiUrl } from '../config'
 
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const token = getToken()
@@ -6,7 +7,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   headers.set('Content-Type', 'application/json')
   if (token) headers.set('Authorization', `Bearer ${token}`)
 
-  const res = await fetch(`/api${path}`, { ...init, headers })
+  const res = await fetch(apiUrl(path), { ...init, headers })
 
   if (res.status === 401) {
     clearToken()

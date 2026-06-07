@@ -5,6 +5,7 @@ import { notifications } from '@mantine/notifications'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordStrength } from './PasswordStrength'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { apiUrl } from '../config'
 
 interface FormErrors {
   companyName?: string
@@ -68,7 +69,7 @@ export function SignUpForm() {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(apiUrl('/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companyName, email: email.trim().toLowerCase(), password }),

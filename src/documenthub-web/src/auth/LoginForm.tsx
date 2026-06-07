@@ -4,6 +4,7 @@ import { Anchor, Button, PasswordInput, Stack, Text, TextInput } from '@mantine/
 import { notifications } from '@mantine/notifications'
 import { AuthLayout } from '../components/AuthLayout'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { apiUrl } from '../config'
 
 interface FormErrors {
   email?: string
@@ -59,7 +60,7 @@ export function LoginForm() {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(apiUrl('/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase(), password }),

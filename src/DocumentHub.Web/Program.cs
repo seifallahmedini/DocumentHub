@@ -4,6 +4,14 @@ using DocumentHub.Web.Endpoints.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()));
+
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddCoreServices();
@@ -15,6 +23,7 @@ app.InitializeDatabase();
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
