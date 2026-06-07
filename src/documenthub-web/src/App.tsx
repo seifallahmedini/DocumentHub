@@ -1,10 +1,9 @@
-import { useState, type ReactNode } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { type ReactNode } from 'react'
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import {
   ActionIcon,
   AppShell,
   Avatar,
-  Box,
   Burger,
   Button,
   Container,
@@ -34,6 +33,7 @@ import { LoginForm } from './auth/LoginForm'
 import { clearToken, isAuthenticated } from './auth/useAuth'
 import { Logo } from './components/Logo'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
+import { MembersPage } from './pages/MembersPage'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />
@@ -45,9 +45,44 @@ const STATS = [
   { label: 'Clients', icon: IconUsers, color: 'blue' },
 ]
 
-function Dashboard() {
+function DashboardHome() {
   useDocumentTitle('Dashboard')
+  return (
+    <Container size="lg" py="xl">
+      <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
+        {STATS.map(({ label, icon: Icon, color }) => (
+          <Paper key={label} withBorder p="md" radius="md">
+            <Group justify="space-between" mb="xs">
+              <Text size="sm" c="dimmed" fw={500}>{label}</Text>
+              <ThemeIcon size={36} radius="md" color={color} variant="light">
+                <Icon size={20} />
+              </ThemeIcon>
+            </Group>
+            <Title order={2} fw={700}>0</Title>
+          </Paper>
+        ))}
+      </SimpleGrid>
+      <Paper withBorder p="xl" radius="md">
+        <Stack align="center" py="xl" gap="md">
+          <ThemeIcon size={64} radius="xl" color="violet" variant="light">
+            <IconFilePlus size={32} />
+          </ThemeIcon>
+          <Title order={3} ta="center">No documents yet</Title>
+          <Text c="dimmed" size="sm" ta="center" maw={360}>
+            Upload your first document to get started. You can organise, tag, and search all your company files from here.
+          </Text>
+          <Button leftSection={<IconFilePlus size={16} />} disabled mt="xs">
+            Upload document
+          </Button>
+        </Stack>
+      </Paper>
+    </Container>
+  )
+}
+
+function Dashboard() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [opened, { toggle }] = useDisclosure()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
@@ -108,54 +143,29 @@ function Dashboard() {
           <NavLink
             label="Documents"
             leftSection={<IconFiles size={16} />}
-            active
+            active={location.pathname === '/dashboard'}
+            onClick={() => navigate('/dashboard')}
+          />
+          <NavLink
+            label="Members"
+            leftSection={<IconUsers size={16} />}
+            active={location.pathname === '/members'}
+            onClick={() => navigate('/members')}
           />
           <NavLink
             label="Invoices"
             leftSection={<IconFileInvoice size={16} />}
             disabled
           />
-          <NavLink
-            label="Clients"
-            leftSection={<IconUsers size={16} />}
-            disabled
-          />
         </Stack>
       </AppShell.Navbar>
 
       <AppShell.Main>
-        <Container size="lg" py="xl">
-          {/* Stats row */}
-          <SimpleGrid cols={{ base: 1, sm: 3 }} mb="xl">
-            {STATS.map(({ label, icon: Icon, color }) => (
-              <Paper key={label} withBorder p="md" radius="md">
-                <Group justify="space-between" mb="xs">
-                  <Text size="sm" c="dimmed" fw={500}>{label}</Text>
-                  <ThemeIcon size={36} radius="md" color={color} variant="light">
-                    <Icon size={20} />
-                  </ThemeIcon>
-                </Group>
-                <Title order={2} fw={700}>0</Title>
-              </Paper>
-            ))}
-          </SimpleGrid>
-
-          {/* Empty state */}
-          <Paper withBorder p="xl" radius="md">
-            <Stack align="center" py="xl" gap="md">
-              <ThemeIcon size={64} radius="xl" color="violet" variant="light">
-                <IconFilePlus size={32} />
-              </ThemeIcon>
-              <Title order={3} ta="center">No documents yet</Title>
-              <Text c="dimmed" size="sm" ta="center" maw={360}>
-                Upload your first document to get started. You can organise, tag, and search all your company files from here.
-              </Text>
-              <Button leftSection={<IconFilePlus size={16} />} disabled mt="xs">
-                Upload document
-              </Button>
-            </Stack>
-          </Paper>
-        </Container>
+        <Routes>
+          <Route path="/dashboard" element={<DashboardHome />} />
+          <Route path="/members" element={<Container size="lg" py="xl"><MembersPage /></Container>} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
       </AppShell.Main>
     </AppShell>
   )
@@ -167,8 +177,7 @@ export default function App() {
       <Routes>
         <Route path="/register" element={<SignUpForm />} />
         <Route path="/login" element={<LoginForm />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

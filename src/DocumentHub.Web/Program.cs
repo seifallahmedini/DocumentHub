@@ -1,6 +1,7 @@
 using DocumentHub.Core;
 using DocumentHub.Infrastructure;
 using DocumentHub.Web.Endpoints.Auth;
+using DocumentHub.Web.Endpoints.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ app.UseAuthorization();
 app.MapGroup("/auth")
    .MapRegisterEndpoint()
    .MapLoginEndpoint();
+
+app.MapGroup("/users")
+   .RequireAuthorization()
+   .MapUsersEndpoints();
 
 app.Run();
 
