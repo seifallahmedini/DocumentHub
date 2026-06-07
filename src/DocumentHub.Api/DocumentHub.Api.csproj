@@ -10,4 +10,10 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DocumentHub.Application\DocumentHub.Application.csproj" />
+    <ProjectReference Include="..\DocumentHub.Infrastructure\DocumentHub.Infrastructure.csproj" />
+    <ProjectReference Include="..\DocumentHub.Domain\DocumentHub.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,41 +1,44 @@
+using DocumentHub.Application;
+using DocumentHub.Application.Auth;
+using DocumentHub.Domain.Exceptions;
+using DocumentHub.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplicationHandlers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.InitializeDatabase();
+
 if (app.Environment.IsDevelopment())
-{
     app.MapOpenApi();
-}
 
-app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
-var summaries = new[]
+app.MapPost("/auth/register", async (RegisterRequest request, RegisterHandler handler) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    try
+    {
+        var result = await handler.HandleAsync(
+            new RegisterCommand(request.CompanyName, request.Email, request.Password));
+        return Results.Ok(new { token = result.Token });
+    }
+    catch (RegistrationValidationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+    catch (DuplicateEmailException)
+    {
+        return Results.Conflict(new { error = "A user with this email already exists." });
+    }
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+record RegisterRequest(string CompanyName, string Email, string Password);
+
+public partial class Program { }

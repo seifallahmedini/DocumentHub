@@ -1,6 +1,9 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/DocumentHub.Api/DocumentHub.Api.csproj" />
+    <Project Path="src/DocumentHub.Application/DocumentHub.Application.csproj" />
+    <Project Path="src/DocumentHub.Domain/DocumentHub.Domain.csproj" />
+    <Project Path="src/DocumentHub.Infrastructure/DocumentHub.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DocumentHub.Api.Tests/DocumentHub.Api.Tests.csproj" />
