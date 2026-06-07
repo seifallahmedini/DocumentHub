@@ -1,15 +1,35 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
+import { AppShell, Button, Container, Group, Text, Title } from '@mantine/core'
 import { SignUpForm } from './auth/SignUpForm'
 import { LoginForm } from './auth/LoginForm'
-import { isAuthenticated } from './auth/useAuth'
+import { clearToken, isAuthenticated } from './auth/useAuth'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 function Dashboard() {
-  return <h1>Dashboard</h1>
+  const navigate = useNavigate()
+  function logout() {
+    clearToken()
+    navigate('/login')
+  }
+  return (
+    <AppShell header={{ height: 60 }}>
+      <AppShell.Header>
+        <Group h="100%" px="md" justify="space-between">
+          <Title order={4}>DocumentHub</Title>
+          <Button variant="subtle" onClick={logout}>Log out</Button>
+        </Group>
+      </AppShell.Header>
+      <AppShell.Main>
+        <Container mt="xl">
+          <Text>Welcome to DocumentHub.</Text>
+        </Container>
+      </AppShell.Main>
+    </AppShell>
+  )
 }
 
 export default function App() {

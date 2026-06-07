@@ -1,21 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-interface FormErrors {
-  email?: string
-  password?: string
-  server?: string
-}
+import { Alert, Anchor, Button, Center, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core'
+import { IconAlertCircle } from '@tabler/icons-react'
 
 export function LoginForm() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<FormErrors>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [serverError, setServerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function validate(): FormErrors {
-    const errs: FormErrors = {}
+  function validate() {
+    const errs: typeof errors = {}
     if (!email.trim()) errs.email = 'Email is required.'
     if (!password.trim()) errs.password = 'Password is required.'
     return errs
@@ -31,6 +28,7 @@ export function LoginForm() {
 
     setIsSubmitting(true)
     setErrors({})
+    setServerError('')
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -44,9 +42,9 @@ export function LoginForm() {
         localStorage.setItem('token', token)
         navigate('/dashboard')
       } else if (res.status === 401) {
-        setErrors({ server: 'Invalid email or password.' })
+        setServerError('Invalid email or password.')
       } else {
-        setErrors({ server: 'Login failed. Please try again.' })
+        setServerError('Login failed. Please try again.')
       }
     } finally {
       setIsSubmitting(false)
@@ -54,34 +52,42 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <div>
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-        {errors.email && <span>{errors.email}</span>}
-      </div>
+    <Center mih="100svh">
+      <Paper withBorder shadow="md" p="xl" w={420}>
+        <Title order={2} mb="lg">Sign in to DocumentHub</Title>
 
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
-        {errors.password && <span>{errors.password}</span>}
-      </div>
+        {serverError && (
+          <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
+            {serverError}
+          </Alert>
+        )}
 
-      {errors.server && <span>{errors.server}</span>}
+        <form onSubmit={handleSubmit} noValidate>
+          <Stack>
+            <TextInput
+              label="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              error={errors.email}
+            />
+            <PasswordInput
+              label="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              error={errors.password}
+            />
+            <Button type="submit" loading={isSubmitting} fullWidth mt="sm">
+              Log in
+            </Button>
+          </Stack>
+        </form>
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Logging in…' : 'Log in'}
-      </button>
-    </form>
+        <Text size="sm" ta="center" mt="md">
+          Don't have an account?{' '}
+          <Anchor href="/register">Sign up</Anchor>
+        </Text>
+      </Paper>
+    </Center>
   )
 }

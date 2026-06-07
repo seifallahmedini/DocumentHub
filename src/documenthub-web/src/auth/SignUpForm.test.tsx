@@ -1,16 +1,19 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MantineProvider } from '@mantine/core'
 import { SignUpForm } from './SignUpForm'
 
 function renderWithRouter(ui: React.ReactElement) {
   return render(
-    <MemoryRouter initialEntries={['/register']}>
-      <Routes>
-        <Route path="/register" element={ui} />
-        <Route path="/dashboard" element={<div>Dashboard</div>} />
-      </Routes>
-    </MemoryRouter>
+    <MantineProvider>
+      <MemoryRouter initialEntries={['/register']}>
+        <Routes>
+          <Route path="/register" element={ui} />
+          <Route path="/dashboard" element={<div>Dashboard</div>} />
+        </Routes>
+      </MemoryRouter>
+    </MantineProvider>
   )
 }
 
@@ -37,7 +40,7 @@ test('redirects to dashboard on successful registration', async () => {
 
   await userEvent.type(screen.getByLabelText(/company name/i), 'TitanCore SUARL')
   await userEvent.type(screen.getByLabelText(/email/i), 'admin@titancore.tn')
-  await userEvent.type(screen.getByLabelText(/password/i), 'SecurePass123!')
+  await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'SecurePass123!')
   await userEvent.click(screen.getByRole('button', { name: /sign up/i }))
 
   await waitFor(() => {
@@ -54,7 +57,7 @@ test('shows error message when email is already taken', async () => {
 
   await userEvent.type(screen.getByLabelText(/company name/i), 'Acme Corp')
   await userEvent.type(screen.getByLabelText(/email/i), 'taken@example.com')
-  await userEvent.type(screen.getByLabelText(/password/i), 'SecurePass123!')
+  await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'SecurePass123!')
   await userEvent.click(screen.getByRole('button', { name: /sign up/i }))
 
   await waitFor(() => {
