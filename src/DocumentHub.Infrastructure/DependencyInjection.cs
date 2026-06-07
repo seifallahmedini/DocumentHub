@@ -1,6 +1,5 @@
 using System.Text;
-using DocumentHub.Application;
-using DocumentHub.Application.Auth;
+using DocumentHub.Core.Interfaces;
 using DocumentHub.Infrastructure.Auth;
 using DocumentHub.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

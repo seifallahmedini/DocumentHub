@@ -1,6 +1,6 @@
-using DocumentHub.Domain.Entities;
+using DocumentHub.Core.Entities;
 
-namespace DocumentHub.Application;
+namespace DocumentHub.Core.Interfaces;
 
 public interface IAppDbContext
 {

@@ -1,6 +1,6 @@
-using DocumentHub.Application;
-using DocumentHub.Domain.Entities;
-using DocumentHub.Domain.Exceptions;
+using DocumentHub.Core.Entities;
+using DocumentHub.Core.Exceptions;
+using DocumentHub.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocumentHub.Infrastructure.Persistence;

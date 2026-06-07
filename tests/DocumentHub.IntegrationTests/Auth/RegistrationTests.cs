@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 
-namespace DocumentHub.Api.Tests.Auth;
+namespace DocumentHub.IntegrationTests.Auth;
 
 public class RegistrationTests(TestWebApplicationFactory factory)
     : IClassFixture<TestWebApplicationFactory>

@@ -1,7 +1,8 @@
-using DocumentHub.Domain.Entities;
-using DocumentHub.Domain.Exceptions;
+using DocumentHub.Core.Entities;
+using DocumentHub.Core.Exceptions;
+using DocumentHub.Core.Interfaces;
 
-namespace DocumentHub.Application.Auth;
+namespace DocumentHub.Core.UseCases.Auth;
 
 public record RegisterCommand(string CompanyName, string Email, string Password);
 public record RegisterResult(string Token);
@@ -30,7 +31,7 @@ public class RegisterHandler(IAppDbContext db, ITokenService tokenService, IPass
 
         await db.AddTenantAsync(tenant);
         await db.AddUserAsync(user);
-        await db.SaveChangesAsync();  // throws DuplicateEmailException on unique constraint
+        await db.SaveChangesAsync();
 
         return new RegisterResult(tokenService.GenerateToken(user.Id, user.TenantId, user.Role.ToString()));
     }

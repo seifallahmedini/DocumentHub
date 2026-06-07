@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DocumentHub.Api\DocumentHub.Api.csproj" />
+    <ProjectReference Include="..\..\src\DocumentHub.Web\DocumentHub.Web.csproj" />
     <ProjectReference Include="..\..\src\DocumentHub.Infrastructure\DocumentHub.Infrastructure.csproj" />
   </ItemGroup>
 

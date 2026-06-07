@@ -11,9 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentHub.Application\DocumentHub.Application.csproj" />
+    <ProjectReference Include="..\DocumentHub.Core\DocumentHub.Core.csproj" />
     <ProjectReference Include="..\DocumentHub.Infrastructure\DocumentHub.Infrastructure.csproj" />
-    <ProjectReference Include="..\DocumentHub.Domain\DocumentHub.Domain.csproj" />
   </ItemGroup>
 
 </Project>

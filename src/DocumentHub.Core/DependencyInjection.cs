@@ -1,7 +1,7 @@
-using DocumentHub.Application.Auth;
+using DocumentHub.Core.UseCases.Auth;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DocumentHub.Application;
+namespace DocumentHub.Core;
 
 public static class DependencyInjection
 {
