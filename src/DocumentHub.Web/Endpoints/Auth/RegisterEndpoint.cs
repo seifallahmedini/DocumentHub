@@ -5,7 +5,7 @@ namespace DocumentHub.Web.Endpoints.Auth;
 
 public static class RegisterEndpoint
 {
-    public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder group)
+    public static IEndpointRouteBuilder MapRegisterEndpoint(this IEndpointRouteBuilder group)
     {
         group.MapPost("/register", HandleAsync);
         return group;
